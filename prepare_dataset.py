@@ -58,6 +58,8 @@ if __name__ == "__main__":
                         type=int, default=8000000)
     parser.add_argument("--stratified", help="Perform stratified sampling to reduce the size of the"
                                              "dataset.", action="store_true", default=False)
+    parser.add_argument("--seed", help="Specify a seed to ensure deterministic splitting",
+                        default=2020, type=int)
 
     # Parse and get the arguments
     args = parser.parse_args()
@@ -67,6 +69,10 @@ if __name__ == "__main__":
     fasttext = args.fasttext
     size = args.size
     stratified = args.stratified
+    seed = args.seed
+
+    # Set seed and deterministic behaviour
+    np.random.seed(seed)
 
     # Read the data inside a dataframe
     df = pd.read_csv(data_path, header=None, sep="\t", names=["product", "category"])
@@ -82,10 +88,12 @@ if __name__ == "__main__":
     # 3) Tokenize the string
     # 4) Convert numbers with a specific token @NUMBER@. We keep unchanged
     #    alphanumeric entries (e.g, 3343als)
+    # 5) Add EOS token at the end of the product title
     df["product"] = df["product"].apply(lambda x: x.lower())
     df["product"] = df["product"].apply(lambda x: strip_punctuation(x))
     df["product"] = df["product"].apply(lambda x: x.split())
     df["product"] = df["product"].apply(lambda x: convert_number_to_token(x))
+    df["product"] = df["product"].apply(lambda x: x+["@EOS@"])
 
     # Split the dataset into train/test
     train, test = train_test_split(df, test_size=0.2)
