@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
             # forward + backward + optimize
             outputs = rakuten_model(inputs)
-            loss = criterion(outputs, labels)
+            loss = criterion(outputs[:, -1, :], labels.flatten())
             loss.backward()
             optimizer.step()
 
@@ -113,6 +113,7 @@ if __name__ == "__main__":
 
         # After each epoch return the validation results
         validation_loss = 0.0
+        t_batch = 1
         if not do_val:
             for t_batch, sample_batched_test in enumerate(dataloader_test):
 
@@ -120,7 +121,7 @@ if __name__ == "__main__":
                 inputs, labels = inputs.to(device), labels.to(device)
 
                 outputs = rakuten_model(inputs)
-                loss_validation = criterion(outputs, labels)
+                loss_validation = criterion(outputs[:, -1, :], labels.flatten())
 
                 validation_loss += loss_validation.item()
 
