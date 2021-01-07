@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     # Load a pre-trained model to keep training
     if not load_model is None:
-        model.load_state_dict(torch.load(load_model))
+        rakuten_model.load_state_dict(torch.load(load_model))
 
     # Define the optimizer
     criterion = CrossEntropyLoss()
