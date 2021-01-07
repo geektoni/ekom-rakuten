@@ -9,7 +9,7 @@ class DefaultLSTM(torch.nn.Module):
         self.hidden_size = hidden_size
         self.n_categories = n_categories
 
-        self.lstm = torch.nn.LSTM(self.embedding_size, hidden_size=hidden_size)
+        self.lstm = torch.nn.LSTM(self.embedding_size, hidden_size=hidden_size, batch_first=True)
         self.drop = torch.nn.Dropout(p=drop_prob)
         self.out = torch.nn.Linear(self.hidden_size, self.n_categories)
 

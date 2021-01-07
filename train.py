@@ -27,8 +27,10 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, help="Set the random number generator seed to ensure reproducibility",
                         default=2020)
     parser.add_argument("--epochs", type=int, help="Training epochs", default=1000)
-    parser.add_argument("--gpu", type=bool, help="If True, the training will procede on a GPU if it is available",
-                        default=True)
+    parser.add_argument("--gpu", help="If True, the training will procede on a GPU if it is available",
+                        default=False, action="store_true")
+    parser.add_argument("--skip-validation", help="If True, the training will procede on a GPU if it is available",
+                        default=False, action="store_true")
 
     # Parse the arguments
     args = parser.parse_args()
@@ -37,6 +39,7 @@ if __name__ == "__main__":
     seed = args.seed
     epochs = args.epochs
     gpu = args.gpu
+    do_val = args.skip_validation
 
     # Set seed and deterministic behaviour
     torch.manual_seed(seed)
@@ -110,15 +113,16 @@ if __name__ == "__main__":
 
         # After each epoch return the validation results
         validation_loss = 0.0
-        for t_batch, sample_batched_test in enumerate(dataloader_test):
+        if not do_val:
+            for t_batch, sample_batched_test in enumerate(dataloader_test):
 
-            inputs, labels = sample_batched_test
-            inputs, labels = inputs.to(device), labels.to(device)
+                inputs, labels = sample_batched_test
+                inputs, labels = inputs.to(device), labels.to(device)
 
-            outputs = rakuten_model(inputs)
-            loss_validation = criterion(outputs, labels)
+                outputs = rakuten_model(inputs)
+                loss_validation = criterion(outputs, labels)
 
-            validation_loss += loss_validation.item()
+                validation_loss += loss_validation.item()
 
         # Print the validation loss
         print("{} - Train/Validation Loss: {:.3f} {:.3f}".format(epoch,
