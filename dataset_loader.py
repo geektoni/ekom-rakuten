@@ -41,8 +41,14 @@ class RakutenLoader(Dataset):
     def _words_to_vec(self, sentence):
         return torch.FloatTensor([self._use_embeddings(word) for word in sentence])
 
+    def _cat_to_idx(self, category):
+        if not category in self.cat2x:
+            return torch.LongTensor([self.categories])
+        else:
+            return torch.LongTensor([self.cat2x[category]])
+
     def __getitem__(self, index):
-        return self._words_to_vec(self.dataset_X[index]), torch.LongTensor([self.cat2x[self.dataset_Y[index]]])
+        return self._words_to_vec(self.dataset_X[index]), torch.LongTensor([])
 
     def __len__(self):
         return self.len
