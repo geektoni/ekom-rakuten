@@ -1,5 +1,32 @@
 # Large-scale taxonomy classification of product titles
 
+## Method
+
+### Data preprocessing
+
+Before feeding the data to our model, we performed several standard actions to
+improve the quality of our dataset. The steps taken are:
+- Place everything to lowercase.
+- Remove punctuation marks.
+- Tokenize the given product title.
+- Convert numbers with a specific token *@NUMBER@*. We keep unchanged alphanumeric entries (e.g, 3343als) since they could provide meaningful information specific to certain categories.
+- Add *@EOS@* token at the end of the product title.
+
+The original dataset was then split into two separate entries (`train_dataset.tsv.gzip` and `test_dataset.tsv.gzip`) which are used to train and then validate our model. More complex strategies such as cross-validation where not used because of time constraints.
+
+### Model
+
+The model is a Bidirectional LSTM with a Linear layer to predict the target
+categories. Dropout is employed to reduce overfitting and to improve final
+performances.
+
+The pipeline is the following:
+- We fetch a batch of product titles
+- We add padding, the *@PAD@* string, to some of the product titles to have an uniform size batch. The padding symbol's embedding is an empty tensor (all zeros);
+- For each product, we convert the title in its embedding form;
+- We feed the result to our network and we compute the Cross Entropy loss.
+- We start over with a new batch.
+
 ## Installation
 
 This repository was tested on Ubuntu 16.04 with Python 3.6. You can use conda
