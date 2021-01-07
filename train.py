@@ -6,8 +6,6 @@ from torch.utils.data import DataLoader
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 
-from sklearn.model_selection import train_test_split
-
 import fasttext
 
 import numpy as np
@@ -34,7 +32,6 @@ if __name__ == "__main__":
 
     # Parse the arguments
     args = parser.parse_args()
-
     dataset_directory = args.dataset
     model_directory = args.save_model
     seed = args.seed
@@ -52,18 +49,14 @@ if __name__ == "__main__":
                               "rakuten_{}.pth".format(timestamp))
 
     # Load the complete dataset
-    complete_dataset = pd.read_pickle("./dataset/rdc-catalog-train-polished.tsv.gzip", compression="gzip")
+    train = pd.read_pickle("./dataset/train_dataset.tsv.gzip", compression="gzip")
+    test = pd.read_pickle("./dataset/train_dataset.tsv.gzip", compression="gzip")
 
-    # Embeddings
+    # Embeddings (these are learnt using only the train dataset)
     embedding = fasttext.load_model("./dataset/fasttext_embeddings.bin")
 
     # Generate categories
-    categories = dict([(s, i) for i, s in enumerate(complete_dataset["category"].unique())])
-
-    # Split the dataset into train/test
-    train, test = train_test_split(complete_dataset, test_size=0.2)
-    train = train.reset_index(drop=True)
-    test = test.reset_index(drop=True)
+    categories = dict([(s, i) for i, s in enumerate(train["category"].unique())])
 
     # Create the dataset and convert the games into something
     # more usable (one-hot encoded version)
