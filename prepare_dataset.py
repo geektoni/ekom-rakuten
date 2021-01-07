@@ -1,5 +1,6 @@
 import argparse
 import string
+import csv
 import pandas as pd
 
 # Punctuation table
@@ -33,12 +34,15 @@ if __name__ == "__main__":
     parser.add_argument("--data", help="Path to the .tsv file containing the data",
                         type=str, default="./dataset/rdc-catalog-train.tsv")
     parser.add_argument("--output", help="Path where to save the polished data",
-                        type=str, default="./dataset/rdc-catalog-train-polished.tsv.gzip")
+                        type=str, default="./dataset/rdc-catalog-train-polished.tsv")
+    parser.add_argument("--fasttext", help="Prepare the dataset for Fasttext",
+                        action="store_true", default=False)
 
     # Parse and get the arguments
     args = parser.parse_args()
     data_path = args.data
     output_path = args.output
+    fasttext = args.fasttext
 
     # Read the data inside a dataframe
     df = pd.read_csv(data_path, header=None, sep="\t", names=["product", "category"])
@@ -56,5 +60,16 @@ if __name__ == "__main__":
     df["product"] = df["product"].apply(lambda x: convert_number_to_token(x))
 
     # Save the polished dataset on disk
-    df.to_pickle(output_path, compression="gzip")
-
+    if not fasttext:
+        df.to_pickle(output_path, compression="gzip")
+    else:
+        # Fasttext dataset format expects lines in the following fashion:
+        # __label__<category>  <sentence>
+        df["category"] = df["category"].apply(lambda x: "__label__" + x)
+        df[['category', 'product']].to_csv(output_path + ".fasttext.csv",
+                                           index=False,
+                                           sep=' ',
+                                           header=None,
+                                           quoting=csv.QUOTE_NONE,
+                                           quotechar="",
+                                           escapechar=" ")
