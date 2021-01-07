@@ -32,8 +32,14 @@ class RakutenLoader(Dataset):
             sentence.extend(["@PAD@"] * (self.pad_sentence_length - len(sentence)))
         return sentence
 
+    def _use_embeddings(self, word):
+        if word == "@PAD@":
+            return torch.zeros(100)
+        else:
+            return self.embeddings[word]
+
     def _words_to_vec(self, sentence):
-        return torch.FloatTensor([self.embeddings[word] for word in sentence])
+        return torch.FloatTensor([self._use_embeddings(word) for word in sentence])
 
     def __getitem__(self, index):
         correct_class = self.cat2x[self.dataset_Y[index]]
