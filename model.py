@@ -15,9 +15,9 @@ class DefaultLSTM(torch.nn.Module):
         self.lstm = torch.nn.LSTM(self.embedding_size, hidden_size=hidden_size, batch_first=True, bidirectional=True)
         self.drop = torch.nn.Dropout(p=drop_prob)
         self.out = torch.nn.Linear(2*self.hidden_size, self.n_categories)
-        self.relu = torch.nn.ReLu()
+        self.relu = torch.nn.ReLU()
 
     def forward(self, batch):
-        
+
         lstm_out, h = self.lstm(batch)
         return self.relu(self.out(self.drop(lstm_out[:, -1, :])))
