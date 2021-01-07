@@ -12,19 +12,26 @@ improve the quality of our dataset. The steps taken are:
 - Convert numbers with a specific token *@NUMBER@*. We keep unchanged alphanumeric entries (e.g, 3343als) since they could provide meaningful information specific to certain categories.
 - Add *@EOS@* token at the end of the product title.
 
+No further improvements are made. It is hinted in [1] that character-level tokenization may be better, since there is an high incidence of alphanumeric product codes.
+
 The original dataset was then split into two separate entries (`train_dataset.tsv.gzip` and `test_dataset.tsv.gzip`) which are used to train and then validate our model. More complex strategies such as cross-validation where not used because of time constraints.
+
+### Embeddings and Categories
+
+We use the FastText utility to produce suitable embeddings given the training dataset only. We also created a dictionary to match all the 3001 categories of
+the training set with an index. We also set an index for unknown categories (which may be present in the test set but not in the training set). 
 
 ### Model
 
 The model is a Bidirectional LSTM with a Linear layer to predict the target
 categories. Dropout is employed to reduce overfitting and to improve final
-performances.
+performances. We use the Cross Entropy loss and Adam as the optimizer.
 
-The pipeline is the following:
-- We fetch a batch of product titles
-- We add padding, the *@PAD@* string, to some of the product titles to have an uniform size batch. The padding symbol's embedding is an empty tensor (all zeros);
+The training process is the following:
+- We fetch a batch of product titles and the corresponding categories.
+- We add padding (*@PAD@* symbol) to some of the product titles to have an uniform size batch. The padding symbol's embedding is an empty tensor (all zeros);
 - For each product, we convert the title in its embedding form;
-- We feed the result to our network and we compute the Cross Entropy loss.
+- We feed the result to our network and we compute the Cross Entropy loss. We then perform a learning iteration.
 - We start over with a new batch.
 
 ## Installation

@@ -31,6 +31,7 @@ if __name__ == "__main__":
                         default=False, action="store_true")
     parser.add_argument("--skip-validation", help="If True, the training will procede on a GPU if it is available",
                         default=False, action="store_true")
+    parser.add_argument("--load-model", help="Load a pre-trained model to continue training", default=None, type=str)
 
     # Parse the arguments
     args = parser.parse_args()
@@ -40,6 +41,7 @@ if __name__ == "__main__":
     epochs = args.epochs
     gpu = args.gpu
     do_val = args.skip_validation
+    load_model = args.load_model
 
     # Set seed and deterministic behaviour
     torch.manual_seed(seed)
@@ -77,6 +79,10 @@ if __name__ == "__main__":
 
     # Create the model we will use
     rakuten_model = DefaultLSTM(len(categories))
+
+    # Load a pre-trained model to keep training
+    if not load_model is None:
+        model.load_state_dict(torch.load(load_model))
 
     # Define the optimizer
     criterion = CrossEntropyLoss()
