@@ -2,6 +2,7 @@ import argparse
 import string
 import csv
 import pandas as pd
+import numpy as np
 
 # Punctuation table
 table = str.maketrans(dict.fromkeys(string.punctuation))
@@ -26,6 +27,18 @@ def convert_number_to_token(product_tokenized):
     return list(map(lambda x: "@NUMBER@" if x.isnumeric() else x, product_tokenized))
 
 
+def stratified_sampling(df, N):
+    """
+    Perform stratified sampling
+    :param df: original dataset
+    :param N: size of the final dataset
+    :return: reduced dataset
+    """
+    return df.groupby('category', group_keys=False).apply(
+        lambda x: x.sample(int(np.rint(N * len(x) / len(df))))).sample(
+        frac=1).reset_index(drop=True)
+
+
 if __name__ == "__main__":
 
     # Build the command-line parser
@@ -37,15 +50,25 @@ if __name__ == "__main__":
                         type=str, default="./dataset/rdc-catalog-train-polished.tsv")
     parser.add_argument("--fasttext", help="Prepare the dataset for Fasttext",
                         action="store_true", default=False)
+    parser.add_argument("--size", help="Specify the size of the final dataset",
+                        type=int, default=8000000)
+    parser.add_argument("--stratified", help="Perform stratified sampling to reduce the size of the"
+                                             "dataset.", action="store_true", default=False)
 
     # Parse and get the arguments
     args = parser.parse_args()
     data_path = args.data
     output_path = args.output
     fasttext = args.fasttext
+    size = args.size
+    stratified = args.stratified
 
     # Read the data inside a dataframe
     df = pd.read_csv(data_path, header=None, sep="\t", names=["product", "category"])
+    if not stratified:
+        df = df[0:size]
+    else:
+        df = stratified_sampling(df, size)
 
     # We polish the data given, namely the "product" column. The step we perform are
     # the following:
@@ -60,9 +83,9 @@ if __name__ == "__main__":
     df["product"] = df["product"].apply(lambda x: convert_number_to_token(x))
 
     # Save the polished dataset on disk
-    if not fasttext:
-        df.to_pickle(output_path, compression="gzip")
-    else:
+    df.to_pickle(output_path+".gzip", compression="gzip")
+
+    if fasttext:
         # Fasttext dataset format expects lines in the following fashion:
         # __label__<category>  <sentence>
         df["category"] = df["category"].apply(lambda x: "__label__" + x)
