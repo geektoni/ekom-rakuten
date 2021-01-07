@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
             # forward + backward + optimize
             outputs = rakuten_model(inputs)
-            loss = criterion(outputs[:, -1, :], labels.flatten())
+            loss = criterion(outputs, labels.flatten())
             loss.backward()
             optimizer.step()
 
@@ -121,7 +121,7 @@ if __name__ == "__main__":
                 inputs, labels = inputs.to(device), labels.to(device)
 
                 outputs = rakuten_model(inputs)
-                loss_validation = criterion(outputs[:, -1, :], labels.flatten())
+                loss_validation = criterion(outputs, labels.flatten())
 
                 validation_loss += loss_validation.item()
 
