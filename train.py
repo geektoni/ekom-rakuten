@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     # Load the complete dataset
     train = pd.read_pickle("./dataset/train_dataset.tsv.gzip", compression="gzip")
-    test = pd.read_pickle("./dataset/train_dataset.tsv.gzip", compression="gzip")
+    test = pd.read_pickle("./dataset/test_dataset.tsv.gzip", compression="gzip")
 
     # Embeddings (these are learnt using only the train dataset)
     embedding = fasttext.load_model("./dataset/fasttext_embeddings.bin")

@@ -48,7 +48,7 @@ class RakutenLoader(Dataset):
             return torch.LongTensor([self.cat2x[category]])
 
     def __getitem__(self, index):
-        return self._words_to_vec(self.dataset_X[index]), torch.LongTensor([])
+        return self._words_to_vec(self.dataset_X[index]), self._cat_to_idx(self.dataset_Y[index])
 
     def __len__(self):
         return self.len
