@@ -2,6 +2,8 @@
 
 ## Method
 
+The methods used were inspired by [1] (FastText embeddings) and [2] (Bidirectional LSTM). See the reference section for the original papers.
+
 ### Data preprocessing
 
 Before feeding the data to our model, we performed several standard actions to
@@ -23,7 +25,7 @@ the training set with an index. We also set an index for unknown categories (whi
 
 ### Model
 
-The model is a Bidirectional LSTM with a Linear layer to predict the target
+The model is a **Bidirectional LSTM** with a Linear layer to predict the target
 categories. Dropout is employed to reduce overfitting and to improve final
 performances. We use the Cross Entropy loss and Adam as the optimizer.
 
@@ -85,12 +87,27 @@ cd ekom-rakuten
 conda activate ekom
 python train.py
 ```
+To speed up training, it is possible also to skip the validation by passing an additional keyword.
+```bash
+python train.py --skip-validation
+```
 
 ### Predict and evaluate
 Once the model is trained, we can easily compute our predictions and evaluate our model by running the following script.
 ```bash
 cd ekom-rakuten
 conda activate ekom
-python predict.py
+python predict.py --load-models ./dataset/<model_of_you_choice>.pth
 python eval.py prediction.csv gold.csv
 ```
+If you want to supply the pretrained model the commands are:
+```bash
+python predict.py --load-models ./dataset/rakuten_pretrained.pth
+python eval.py prediction.csv gold.csv
+```
+
+## References
+
+[1] Lin, Yiu-Chang, Pradipto Das, and Ankur Datta. "Overview of the SIGIR 2018 eCom Rakuten Data Challenge." eCOM@ SIGIR. 2018.
+
+[2] Skinner, Michael. "Product categorization with LSTMs and balanced pooling views." eCOM@ SIGIR. 2018.
