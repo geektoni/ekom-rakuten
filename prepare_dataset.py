@@ -47,7 +47,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("prepare_dataset.py",
                                      description="Perform some basic cleaning on Rakuten dataset.")
     parser.add_argument("--data", help="Path to the .tsv file containing the data",
-                        type=str, default="./dataset/rdc-catalog-train.tsv")
+                        type=str, default="./dataset/rdc-catalog-train.tsv.gz")
     parser.add_argument("--output-train", help="Path where to save the polished data",
                         type=str, default="./dataset/train_dataset.tsv.gzip")
     parser.add_argument("--output-test", help="Path where to save the polished data",
@@ -105,10 +105,9 @@ if __name__ == "__main__":
     test.to_pickle(output_test, compression="gzip")
 
     if fasttext:
-        # Fasttext dataset format expects lines in the following fashion:
-        # __label__<category>  <sentence>
-        train["category"] = train["category"].apply(lambda x: "__label__" + x)
-        train[['category', 'product']].to_csv(output_train + ".fasttext.csv",
+        # We regenerate all the product title
+        train["fasttext"] = train["product"].apply(lambda x: " ".join(x))
+        train["fasttext"].to_csv(output_train + ".fasttext.csv",
                                            index=False,
                                            sep=' ',
                                            header=None,

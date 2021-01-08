@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# This code was taken from the original Github's repository of the
+# SIGIR 2018 eCom Rakuten Data Challenge.
+# https://github.com/sigir-ecom/dataChallenge/
 
 import argparse
 from sklearn.metrics import precision_recall_fscore_support

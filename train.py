@@ -1,4 +1,4 @@
-from model import DefaultLSTM
+from model import BidLSTM
 from dataset_loader import RakutenLoader
 
 import torch
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", type=int, help="Training epochs", default=1000)
     parser.add_argument("--gpu", help="If True, the training will procede on a GPU if it is available",
                         default=False, action="store_true")
-    parser.add_argument("--skip-validation", help="If True, the training will procede on a GPU if it is available",
+    parser.add_argument("--skip-validation", help="If True, skip the validation steps (faster training)",
                         default=False, action="store_true")
     parser.add_argument("--load-model", help="Load a pre-trained model to continue training", default=None, type=str)
 
@@ -63,12 +63,11 @@ if __name__ == "__main__":
     # Generate categories
     categories = dict([(s, i) for i, s in enumerate(train["category"].unique())])
 
-    # Create the dataset and convert the games into something
-    # more usable (one-hot encoded version)
+    # Load the training and test dataset
     dataset_train = RakutenLoader(train["product"], train["category"], embedding, categories)
     dataset_test = RakutenLoader(test["product"], train["category"], embedding, categories)
 
-    # Create the DataLoader object used for training
+    # Create the DataLoader object used for training and testing
     dataloader_train = DataLoader(dataset_train, batch_size=100,
                                 shuffle=True, num_workers=4,
                                 pin_memory=True)
@@ -78,7 +77,7 @@ if __name__ == "__main__":
                                  pin_memory=True)
 
     # Create the model we will use
-    rakuten_model = DefaultLSTM(len(categories))
+    rakuten_model = BidLSTM(len(categories))
 
     # Load a pre-trained model to keep training
     if not load_model is None:
