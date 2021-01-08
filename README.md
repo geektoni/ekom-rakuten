@@ -18,20 +18,19 @@ Before feeding the data to our model, we perform several standard actions to imp
 
 No further improvements are made. It is hinted in [2] that character-level tokenization may be better since there is a high incidence of alphanumeric product codes.
 
-The original dataset was then split into two separate entries (`train_dataset.tsv.gzip` and `test_dataset.tsv.gzip`) which are used to train and then validate our model (80% training, 20% test).
-The splitting was done by random sampling (as an improvement, stratified sampling could be used instead).
+The original dataset was then split into two separate entries (`train_dataset.tsv.gzip` and `test_dataset.tsv.gzip`) which are used to train and then validate our model (80% training, 20% test). The splitting was done by random sampling (as an improvement, stratified sampling could be used instead).
 
 ### Embeddings and Categories
 
-We use the FastText utility to produce suitable embeddings given the training dataset only. We also created a dictionary to match all the 3001 categories of
-the training set with an index. We also set an index for unknown categories (which may be present in the test set but not in the training set).
+We use the **FastText** utility to produce suitable embeddings given the training dataset only. We also create a dictionary to match all the 3001 categories of
+the training set with an index. We also set an index for unknown categories (which may be present in the test set but not in the training set). We have only 3001
+categories in the training set out of 3008 because of the random sampling used.
 
 ### Model
 
 The model is a **Bidirectional LSTM** with a Linear layer to predict the target
 categories. Dropout is employed to reduce overfitting and to improve final
-performances. We use the Cross-Entropy loss and Adam as the optimizer. More complex strategies such as cross-validation
-to validate the models were not used because of time constraints. The same applies for hyperparameters search.
+performances. We use the Cross-Entropy loss and Adam as the optimizer. More complex strategies such as cross-validation to validate the models were not used because of time constraints. The same applies for hyperparameters search.
 
 
 The training process is the following:
@@ -41,12 +40,23 @@ The training process is the following:
 - We feed the result to our network and we compute the Cross-Entropy loss. We then perform a learning iteration.
 - We start over with a new batch.
 
+## Project Files
+
+- **dataset_loader.py**: it contains the class used to load the dataset and to generate the batches needed during training;
+- **eval.py**: this script computes the evaluation metrics given the predictions and the ground truth data;
+- **model.py**: it contains the PyTorch model used for this task;
+- **predict.py**: this script loads a pre-trained model to generate predictions
+(see `predict.py --help`).
+- **prepare_dataset.py**: this script process and generates the data needed for
+this task (see `prepare_dataset.py --help`);
+- **train.py**: this scripts trains the models (see `train.py --help`);
+
 ## Installation
 
 This repository was tested on Ubuntu 16.04 with Python 3.7. You can use conda
 to install all the dependencies needed for the project. Once you have cloned
 the repository, please follow these steps to install everything and to start
-the environment
+the environment.
 ```bash
 git clone https://github.com/geektoni/ekom-rakuten
 cd ekom-rakuten
@@ -55,9 +65,7 @@ conda activate ekom
 pip install -r  requirements.txt
 ```
 Besides standard requirements, we make use of FastText library of Facebook to
-generate the word embeddings and also to train a baseline model.
-Follow the steps below to obtain the code (you will need to have a suitable g++
-compiler).
+generate the word embeddings. Follow the steps below to obtain the code (you will need to have a suitable g++ compiler).
 ```bash
 cd ekom-rakuten
 conda activate ekom
@@ -75,9 +83,8 @@ pip install .
 into the dataset directory before running any script**
 
 Before training or running a pre-trained model, we need first to parse the original
-dataset and we need to create the word embeddings by using the FastText command-line
-tool. We first preprocess the dataset with the `prepare_dataset.py` script. The option `--fasttext` generates a
-suitable file to be parsed with FastText.
+dataset. We also need to create the word embeddings by using the FastText command-line tool. We first preprocess the dataset with the `prepare_dataset.py` script.
+The script will generate two files, `train_dataset.tsv.gzip` and `test_dataset.tsv.gzip`. The option `--fasttext` generates also a suitable file to be parsed with FastText.
 ```bash
 cd ekom-rakuten
 conda activate ekom
@@ -85,7 +92,7 @@ python prepare_dataset.py --fasttext
 ```
 
 We then compute the FastText embeddings by taking as inputs the file generated in the `./dataset` directory.
-We use the skipgram models and we generate 100 dimensions embeddings.
+We use the *skipgram* model and we generate 100 dimensions embeddings.
 ```bash
 cd fastText
 ./fasttext skipgram -input ../dataset/train_dataset.tsv.gzip.fasttext.csv -output ../dataset/fasttext_embeddings -dim 100
@@ -94,7 +101,6 @@ cd fastText
 ### Train the model
 After having built the embeddings and the training and test dataset, we can move forward to training the model itself. Since we load most of the data inside the main
 memory, make sure to have at least around 6GB of free RAM.
-
 ```bash
 cd ekom-rakuten
 conda activate ekom
@@ -106,16 +112,16 @@ python train.py --skip-validation
 ```
 
 ### Predict and evaluate
-Once the model is trained, we can easily compute our predictions and evaluate our model by running the following script.
+Once the model is trained, we can easily compute our predictions and evaluate our model by running the `predict.py` script.
 ```bash
 cd ekom-rakuten
 conda activate ekom
 python predict.py --load-models ./dataset/<model_of_you_choice>.pth
 python eval.py prediction.csv gold.csv
 ```
-If you want to supply the pre-trained model the commands are:
+If you want to supply the pre-trained model provided with this repository the commands are:
 ```bash
-python predict.py --load-models ./dataset/rakuten_pretrained.pth
+python predict.py --load-models ./dataset/rakuten_model.pth
 python eval.py prediction.csv gold.csv
 ```
 
